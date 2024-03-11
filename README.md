@@ -11,7 +11,7 @@ cd lib/esp-idf
 sh install.sh
 ```
 
-Add the export shell script to `.bashrc` if you use bash, or `.zshrc/zprofile` etc. if you use zsh
+Add the export shell script to `.bashrc` if you use bash, or `.zshrc`/`.zprofile` etc. if you use zsh
 
 ```bash
 vi ~/.bashrc
