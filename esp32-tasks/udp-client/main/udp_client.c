@@ -10,6 +10,5 @@
 
 void app_main(void) {
     ESP_LOGI("Hello: HI", "does this work");
-
     return;
 }
