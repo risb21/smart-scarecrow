@@ -9,6 +9,9 @@ set(srcs
   ../../../lib/esp32-camera/conversions/to_bmp.c
   ../../../lib/esp32-camera/conversions/jpge.cpp
   ../../../lib/esp32-camera/conversions/esp_jpg_decode.c
+  ../wifi_conn/wifi_config.h
+  ../wifi_conn/wifi_connection.c
+  ../wifi_conn/wifi_connection.h
   )
 
 set(priv_include_dirs
@@ -100,7 +103,7 @@ idf_component_register(
   SRCS ${srcs}
   INCLUDE_DIRS ${include_dirs}
   PRIV_INCLUDE_DIRS ${priv_include_dirs}
-  REQUIRES driver  # due to include of driver/gpio.h in esp_camera.h
+  REQUIRES driver nvs_flash esp_wifi # due to include of driver/gpio.h in esp_camera.h
   PRIV_REQUIRES ${priv_requires}
 )
 

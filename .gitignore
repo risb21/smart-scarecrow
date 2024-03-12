@@ -33,3 +33,5 @@
 
 esp32-tasks/*/build
 .vscode
+
+**/wifi_config.h
