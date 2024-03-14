@@ -31,4 +31,6 @@
 *.out
 *.app
 
-*/venv/*
+*venv
+*__pycache__
+*flask_session

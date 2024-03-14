@@ -4,6 +4,8 @@ from flask_session import Session
 import time
 import random
 
+from dataset_preprocess import index_datasets
+
 random.seed(time.time_ns())
 
 application = Flask(__name__)
@@ -37,6 +39,6 @@ def task():
 
 if __name__ == "__main__":
     # Index all dataset images
-
+    index_datasets()
     # Run applcation
     application.run(debug=True, port=2048)
