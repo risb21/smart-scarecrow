@@ -3,6 +3,7 @@ from flask import *
 from flask_session import Session
 import time
 import random
+import os
 
 from dataset_preprocess import index_datasets
 
@@ -38,6 +39,7 @@ def task():
     return main()
 
 if __name__ == "__main__":
+    print(os.getcwd())
     # Index all dataset images
     index_datasets()
     # Run applcation
