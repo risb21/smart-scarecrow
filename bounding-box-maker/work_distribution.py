@@ -5,7 +5,7 @@ def get_work(users: list[str], work_for: str) -> list[str]:
         raise ValueError("User is not in list of users!")
     
     idx = users.index(work_for)
-    imgs = os.listdir("./datasets/data")
+    imgs = os.listdir("./static/data")
     imgs.sort()
 
     extras = len(imgs) % len(users)

@@ -39,7 +39,7 @@ def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]
     return paths
 
 def index_datasets():
-    os.chdir("./datasets")
+    os.chdir("./static")
     try:
         datasets = [obj for obj in os.listdir()
                        if os.path.isdir(obj)   ]
@@ -89,7 +89,6 @@ def index_datasets():
             except Exception as e:
                 os.chdir("..")
 
-        print("  Directories with images:", img_paths)
         print("  Flattening...")
 
         os.mkdir("./data")
@@ -97,7 +96,6 @@ def index_datasets():
         for path in img_paths:
             depth = len(path[2:-1].split("/"))
             img_parent: str = path[2:-1].split("/")[-1].replace(" ", "_")
-            print(os.getcwd(), depth, img_parent)
             os.chdir(path)
 
             try:
@@ -127,6 +125,8 @@ def index_datasets():
         for dir in datasets:
             shutil.rmtree(dir)
 
+        print("  Flattened all datasets!")
+
     except Exception as e:
         os.chdir("..")
         raise e
@@ -135,4 +135,4 @@ def index_datasets():
 
 
 if __name__ == "__main__":
-    index_datasets()
+    pass

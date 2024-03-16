@@ -35,5 +35,5 @@
 *__pycache__
 *flask_session
 
-bounding-box-maker/datasets/*
-!bounding-box-maker/datasets/README.md
+bounding-box-maker/static/*
+!bounding-box-maker/static/README.md
