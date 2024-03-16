@@ -21,13 +21,11 @@ def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]
     if len(files) > 0 and has_img(files):
         path, _ = paths[-1]
         paths[-1] = (path, True)
-        # paths.append((path, False))
     
     if len(dirs) > 0:
         current_dir, _ = paths[-1]
         for dir in dirs:
             os.chdir(f"./{dir}")
-            # path, imgs = paths[-1]
             paths.append((current_dir + dir + "/", False))
     
             try:
@@ -37,8 +35,6 @@ def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]
                 raise e
     
             os.chdir("..")
-    # elif len(files) > 0 and has_img(files):
-    #     paths.pop()
 
     return paths
 

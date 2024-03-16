@@ -34,3 +34,6 @@
 *venv
 *__pycache__
 *flask_session
+
+bounding-box-maker/datasets/*
+!bounding-box-maker/datasets/README.md

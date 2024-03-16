@@ -8,17 +8,19 @@
 <body>
     Hello Hi <br>
     <label for="name">Select User: </label><br>
+    {% for user in users %}
     <form method="post">
-        <input type="submit" value="Tanvi"/>
-        <input type="hidden" name="Tanvi"/>
+        <input type="submit" value="{{ user }}"/>
+        <input type="hidden" name="{{ user }}"/>
     </form>
-    <form method="post">
+    <!-- <form method="post">
         <input type="submit" value="Rishabh">
         <input type="hidden" name="Rishabh"/>
     </form>
     <form method="post">
         <input type="submit" value="Chelsi">
         <input type="hidden" name="Chelsi"/>
-    </form>
+    </form> -->
+    {% endfor %}
 </body>
 </html>
