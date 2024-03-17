@@ -51,6 +51,11 @@ def index_datasets():
         
         zip_files = glob.glob("*.zip")
 
+        if len(zip_files) == 0:
+            print("\nThere are no datasets to index!\n")
+            os.chdir("..")
+            return
+        
         print("\nExtracting datasets from .zip files...")
 
         for file in zip_files:
@@ -65,11 +70,6 @@ def index_datasets():
 
         datasets = [obj for obj in os.listdir()
                        if os.path.isdir(obj)   ]
-        
-        if len(datasets) == 0:
-            print("\nThere are no datasets to index!\n")
-            os.chdir("..")
-            return
         
         print("Creating uniform file structure...")
 
