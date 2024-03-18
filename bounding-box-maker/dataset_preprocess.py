@@ -38,7 +38,7 @@ def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]
 
     return paths
 
-def index_datasets():
+def index_datasets() -> None:
     os.chdir("./static")
     try:
         datasets = [obj for obj in os.listdir()

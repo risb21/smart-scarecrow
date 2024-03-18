@@ -37,3 +37,4 @@
 
 bounding-box-maker/static/*
 !bounding-box-maker/static/README.md
+!bounding-box-maker/static/scripts
