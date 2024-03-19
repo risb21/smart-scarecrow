@@ -16,6 +16,10 @@ class rect {
 let canvas = HTMLDivElement;
 let image = HTMLImageElement;
 let new_box = HTMLDivElement;
+let accept_form = HTMLFormElement;
+let discard_form = HTMLFormElement;
+let data_input = HTMLInputElement;
+let accept_btn = HTMLInputElement;
 let rects = [];
 let drag = false;
 
@@ -73,6 +77,7 @@ function mouseup(e) {
 
 let undo = () => {
     if (canvas.lastChild) {
+        drag = false;
         canvas.removeChild(canvas.lastChild);
         rects.pop();
     }
@@ -80,8 +85,6 @@ let undo = () => {
 
 let setup_canvas = () => {
     canvas = document.getElementById("canvas");
-    // console.log("Image width: " + String(image.clientWidth) + "px");
-    // console.log("Image height: " + String(image.clientHeight) + "px");
     canvas.style.marginTop = String(-image.clientHeight) + "px";
     canvas.style.height = String(image.clientHeight) + "px";
     canvas.addEventListener('mousedown', mousedown);
@@ -96,13 +99,53 @@ let setup_canvas = () => {
 
 function main() {
     image = document.getElementById("image");
-    
+    accept_form = document.getElementById("accept");
+
     if (image.complete) {
         console.log("Image is already loaded");
         setup_canvas();
     } else {
         image.addEventListener('load', setup_canvas);
     }
+
+    accept_btn = document.getElementById("accept-btn");
+
+    accept_btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (rects.length !== 0) {
+            data_input = document.createElement("input");
+            data_input.type = "hidden";
+            data_input.name = "data";
+
+            data_input.value = "";
+            // No. of boxes
+            data_input.value += String(rects.length) + " ";
+            // Image scaled dimensions in pixels
+            data_input.value += String(image.width) + " " + String(image.height);
+            
+            for (let i = 0; i < rects.length; i++) {
+                let startX = rects[i].startX;
+                let startY = rects[i].startY;
+                let w = rects[i].w;
+                let h = rects[i].h;
+
+                // Clamp box coords within image
+                w = startX + w > image.width ? image.width : w;
+                w = startX + w < 0 ? 0 : w;
+                h = startY + h > image.height ? image.height : h;
+                h = startY + h < 0 ? 0 : h;
+
+                // Center, (x, y)
+                data_input.value += " " + String(w/2 + startX) + " " + String(h/2 + startY);
+                // Absolute value of width and height
+                data_input.value += " " + String(w >= 0 ? w : -w) + " " +  String(h >= 0 ? h : -h);
+            }
+
+            accept_form.appendChild(data_input);
+        }
+        // console.log("done");
+        accept_form.submit();            
+    });
 }
 
 

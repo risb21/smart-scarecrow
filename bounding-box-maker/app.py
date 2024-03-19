@@ -30,7 +30,7 @@ users = ['Tanvi', 'Rishabh', 'Chelsi']
 # File handle for a user's bounding box csv file
 # Initially empty object, needs special handling to know if 
 # file is open or not
-boxes_file = io.TextIOBase
+boxes_file = io.TextIOWrapper
 start_idx = 0
 
 @application.route('/', methods = ['GET', 'POST'])
@@ -50,25 +50,49 @@ def main():
 def task():
     global boxes_file, start_idx
     csv_path = f"./static/{session['user'].name}_boxes.csv"
+
     if file_closed(boxes_file) or boxes_file.name != csv_path:
-        if not file_closed(boxes_file):
+        if boxes_file.closed == True or boxes_file.closed == False:
             boxes_file.close()
         start_idx = get_index(csv_path)
-        boxes_file = open(csv_path, 'a+')
+        if f"{session['user'].name}_boxes.csv" not in os.listdir("./static/"):
+            with open(csv_path, "w") as f:
+                pass
+        boxes_file = open(csv_path, 'a')
+
+    print("Is the file open? :", not file_closed(boxes_file))
 
     if request.method  == 'POST':
-        resp = list(request.form)[0]
-        if resp == 'close':
+        command = list(request.form.to_dict().keys())[0]
+        # print(request.form.to_dict().keys())
+        if 'close' == command:
             boxes_file.close()
             return redirect(url_for('end'))
         
-        if resp == 'accept':
-            # Get data from form, append to csv file
+        writer = csv.writer(boxes_file)
+        to_write: list[str] = [session['user'].task[start_idx]]
+
+        if 'accept' == command:
+            # Get data from form, append to csv file    
+            
+            if "data" in request.form.to_dict().keys():
+                # Boxes are marked in the image
+                data = request.form.to_dict()["data"]
+                to_write.extend(data.split(" "))
+            else:
+                # There are no boxes in the image
+                # appending no. of boxes
+                to_write.append("0")
+            print(to_write)
+            writer.writerow(to_write)
             start_idx += 1
+            print("does this work")
             return redirect(url_for('task'))
         
-        if resp == 'discard':
+        if 'discard' == command:
             # Mark the no. of boxes in csv -1, for invalid image
+            to_write.append("-1")
+            writer.writerow(to_write)
             start_idx += 1
             return redirect(url_for('task'))
             
@@ -91,13 +115,5 @@ def end():
 if __name__ == "__main__":
     # Index all dataset images
     index_datasets()
-
-    if 'boxes.csv' in os.listdir("./static/"):
-        with open("./static/boxes.csv", "r") as csv_read:
-            content = list(csv.reader(csv_read))
-            print(len(content))
-            print(content)
-    
-        
     # Run application
     application.run(debug=True, port=2048)

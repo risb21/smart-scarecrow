@@ -12,18 +12,18 @@
     
     <br>
     <form method="post">
-        <input type="submit" value="Close file">
+        <input type="submit" value="Save Work">
         <input type="hidden" name="close">
     </form>
     <div style="height: 500px; width: fit-content;"><img id="image"
     src="{{ url_for('static', filename=img_file) }}" style="height: 100%; display: block;"
     ><div id="canvas" style="width: auto; position: relative;"></div></div><br><br>
     <button onclick="undo()">Undo</button>
-    <form method="post">
-        <input type="submit" value="Accept Boxes">
+    <form method="post" id="accept">
+        <input type="button" id="accept-btn" value="Accept Boxes">
         <input type="hidden" name="accept">
     </form>
-    <form method="post">
+    <form method="post" id="discard">
         <input type="submit" value="Discard">
         <input type="hidden" name="discard">
     </form>
