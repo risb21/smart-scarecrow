@@ -12,12 +12,24 @@ The functions fulfilled by the web server are:
 - Ability to resume work from where the user left off
 
 ## Steps to run the web server
-1. Download all datasets with desired images in the `./static` directory
-2. Run the web server in this directory
+1. Download all datasets in `.zip` format with desired images in the `./static` directory
+2. Install `virtualenv` using pip, create a virtual environment in this directory, activate it and install all requirements, using `requirements.txt`
+   
+   ```bash
+   pip install virtualenv
+   python -m venv venv
+   source ./venv/bin/activate
+   pip install -r requirements.txt
+   ```
+3. Run the web server in this directory
    ```bash
    python app.py --debug
    ```
-3. Open the locally hosted website on a browser
-4. Choose user and begin defining boudning boxes
-5. The user can confirm or undo bounding boxes, or simply discard the image
-6. Once the user is done, they can click on `stop file` to close the open csv file and safely close the web server
+4. Open the locally hosted website on a browser
+5. Choose user and begin defining boudning boxes
+6. The user can confirm or undo bounding boxes, or simply discard the image
+7. Once the user is done, they can click on `stop file` to close the open csv file and safely close the web server
+8. After stopping the webserver, you may deactivate the virtual environment
+   ```bash
+   deactivate
+   ```
