@@ -5,6 +5,9 @@ from zipfile import ZipFile
 import re
 
 def has_img(files: list[str]) -> bool:
+    """
+        Determines if a directory has an image file
+    """
     for file in files:
         if re.match("^.*\.(png|jpe?g)$", file):
             return True
@@ -12,6 +15,10 @@ def has_img(files: list[str]) -> bool:
     return False
 
 def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]:
+    """
+        Recursive function to find paths to all sub-directories with images
+        Return value: list[(path: str, has_images: bool)]
+    """
     dirs = [obj for obj in os.listdir()
                if os.path.isdir(obj)   ]
     files = [obj for obj in os.listdir()
@@ -40,6 +47,7 @@ def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]
 
 def index_datasets() -> None:
     os.chdir("./static")
+    
     try:
         datasets = [obj for obj in os.listdir()
                        if os.path.isdir(obj)   ]
@@ -50,6 +58,7 @@ def index_datasets() -> None:
             return
         
         zip_files = glob.glob("*.zip")
+        zip_files = [file[:-4] for file in zip_files]
 
         if len(zip_files) == 0:
             print("\nThere are no datasets to index!\n")
@@ -59,7 +68,7 @@ def index_datasets() -> None:
         print("\nExtracting datasets from .zip files...")
 
         for file in zip_files:
-            if file[:-4] in datasets:
+            if file in datasets:
                 print(f"  {file} is already unzipped, skipping")
                 continue
 
@@ -110,7 +119,8 @@ def index_datasets() -> None:
                     file_name = img.split(".")
                     file_name[-2] += "_" + img_parent
                     file_name = "".join([
-                        val + "." if i != len(file_name) - 1 
+                        val + "_" if i < len(file_name) - 2
+                        else val + '.' if i != len(file_name) - 1  
                         else val for i, val in enumerate(file_name)
                     ])
                     
@@ -122,8 +132,10 @@ def index_datasets() -> None:
             
             os.chdir("../" * depth)
 
+        
         for dir in datasets:
-            shutil.rmtree(dir)
+            if dir in zip_files:
+                shutil.rmtree(dir)
 
         print("  Flattened all datasets!")
 
