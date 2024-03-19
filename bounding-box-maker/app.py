@@ -42,16 +42,6 @@ def main():
         session['user'] = User(username, get_work(users, username))
         print(f"User: {username}")
 
-        # csv_path = f"./static/{username}_boxes.csv"
-        
-        # if not file_closed(boxes_file):
-        #     boxes_file.close()
-        # start_idx = get_index(csv_path)
-        # boxes_file = open(csv_path, 'a+')
-        # print("is the file closed?:", file_closed(boxes_file))
-        # boxes_file.close()
-        # print("is the file closed?:", file_closed(boxes_file))
-
         return redirect(url_for('task'))
 
     return render_template('index.html', users=users)

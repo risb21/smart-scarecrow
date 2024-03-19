@@ -11,8 +11,6 @@ class rect {
     startY = 0;
     w = 0;
     h = 0;
-    endX = 0;
-    endY = 0;
 };
 
 let canvas = HTMLDivElement;
@@ -80,25 +78,31 @@ let undo = () => {
     }
 }
 
+let setup_canvas = () => {
+    canvas = document.getElementById("canvas");
+    // console.log("Image width: " + String(image.clientWidth) + "px");
+    // console.log("Image height: " + String(image.clientHeight) + "px");
+    canvas.style.marginTop = String(-image.clientHeight) + "px";
+    canvas.style.height = String(image.clientHeight) + "px";
+    canvas.addEventListener('mousedown', mousedown);
+    canvas.addEventListener('mousemove', mousemove);
+    canvas.addEventListener('mouseup', mouseup);
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 'z') {
+            undo();
+        }
+    });
+};
+
 function main() {
     image = document.getElementById("image");
-    canvas = document.getElementById("canvas");
-    image.addEventListener('load', () => {
-        canvas.style.marginTop = String(-image.clientHeight) + "px";
-        canvas.style.height = String(image.clientHeight) + "px";
-        canvas.addEventListener('mousedown', mousedown);
-        canvas.addEventListener('mousemove', mousemove);
-        canvas.addEventListener('mouseup', mouseup);
-        document.addEventListener('keydown', e => {
-            if (e.ctrlKey && e.key === 'z') {
-                undo();
-            }
-        });
-    });
     
-
-
-
+    if (image.complete) {
+        console.log("Image is already loaded");
+        setup_canvas();
+    } else {
+        image.addEventListener('load', setup_canvas);
+    }
 }
 
 
