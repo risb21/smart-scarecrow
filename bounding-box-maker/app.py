@@ -60,11 +60,8 @@ def task():
                 pass
         boxes_file = open(csv_path, 'a')
 
-    print("Is the file open? :", not file_closed(boxes_file))
-
     if request.method  == 'POST':
         command = list(request.form.to_dict().keys())[0]
-        # print(request.form.to_dict().keys())
         if 'close' == command:
             boxes_file.close()
             return redirect(url_for('end'))
@@ -73,8 +70,7 @@ def task():
         to_write: list[str] = [session['user'].task[start_idx]]
 
         if 'accept' == command:
-            # Get data from form, append to csv file    
-            
+            # Get data from form, append to csv file            
             if "data" in request.form.to_dict().keys():
                 # Boxes are marked in the image
                 data = request.form.to_dict()["data"]
@@ -83,10 +79,8 @@ def task():
                 # There are no boxes in the image
                 # appending no. of boxes
                 to_write.append("0")
-            print(to_write)
             writer.writerow(to_write)
             start_idx += 1
-            print("does this work")
             return redirect(url_for('task'))
         
         if 'discard' == command:
@@ -103,7 +97,9 @@ def task():
                 'task.html', 
                 usr = session['user'].name,
                 imgs_left = len(session['user'].task) - start_idx,
-                img_file = f"data/{(session['user'].task)[start_idx]}"
+                imgs_done = start_idx,
+                img_name = session['user'].task[start_idx],
+                img_file = f"data/{(session['user'].task)[start_idx]}",
             )    
     
     return main()

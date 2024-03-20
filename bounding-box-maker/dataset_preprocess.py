@@ -58,7 +58,7 @@ def index_datasets() -> None:
             return
         
         zip_files = glob.glob("*.zip")
-        zip_files = [file[:-4] for file in zip_files]
+        # zip_files = [file[:-4] for file in zip_files]
 
         if len(zip_files) == 0:
             print("\nThere are no datasets to index!\n")
@@ -68,7 +68,7 @@ def index_datasets() -> None:
         print("\nExtracting datasets from .zip files...")
 
         for file in zip_files:
-            if file in datasets:
+            if file[:-4] in datasets:
                 print(f"  {file} is already unzipped, skipping")
                 continue
 

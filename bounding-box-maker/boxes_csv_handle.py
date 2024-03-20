@@ -8,7 +8,6 @@ def get_index(path: str) -> int:
         with open(path, "r") as csv_read:
             content = list(csv.reader(csv_read))
             start_idx = len(content)
-            print(content)
     return start_idx
 
 def file_closed(file: io.TextIOBase) -> bool:
