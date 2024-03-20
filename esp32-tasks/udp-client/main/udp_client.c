@@ -179,11 +179,21 @@ void app_main(void) {
     ESP_LOGE(TAG, "Code Written for AI Thinker ESP32 CAM, cannot run on another platform.");
     return;
 #else
+
     if (init_camera() != ESP_OK) {
         return;
     }
+    
+    // Initialize storage
+    esp_err_t retval = nvs_flash_init();
+    if (retval == ESP_ERR_NVS_NO_FREE_PAGES || retval == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_flash_erase());
+        retval = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK_WITHOUT_ABORT(retval);
+    
+    // Connect to wifi
     wifi_connect();
-
 
     while (true) {
         ESP_LOGI(TAG, "Taking a picture...");
