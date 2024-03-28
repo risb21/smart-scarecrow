@@ -31,7 +31,7 @@
 *.out
 *.app
 
-esp32-tasks/*/build
+*/build
 .vscode
 
 **/wifi_config.h
