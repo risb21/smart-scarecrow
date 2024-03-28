@@ -11,6 +11,7 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 #include "../wifi_conn/wifi_connection.h"
+#include "../wifi_conn/wifi_connection.c"
 
 #include <stdio.h>
 #include <sys/param.h>
@@ -51,6 +52,12 @@
 #define CAM_PIN_HREF 23
 #define CAM_PIN_PCLK 22
 
+#define WIFI_SUCCESS 1 << 0
+#define WIFI_FAILURE 1 << 1
+#define TCP_SUCCESS 1 << 0
+#define TCP_FAILURE 1 << 1
+#define MAX_FAILURES 10
+
 #endif
 
 #if defined(CONFIG_EXAMPLE_IPV4)
@@ -59,7 +66,15 @@
     #define HOST_IP_ADDR ""
 #endif
 
-static const char *TAG = "UDP-Client";
+//static const char *TAG = "UDP-Client";
+
+//static EventGroupHandle_t wifi_event_group;
+
+// retry tracker
+//static int s_retry_num = 0;
+
+// task tag
+//static const char *TAG = "WIFI";
 
 #if ESP_CAMERA_SUPPORTED
 static camera_config_t camera_config = {
@@ -173,37 +188,75 @@ static esp_err_t init_camera(void) {
 // }
 
 
-void app_main(void) {
+// void app_main(void) {
 
-#ifndef ESP_CAMERA_SUPPORTED
-    ESP_LOGE(TAG, "Code Written for AI Thinker ESP32 CAM, cannot run on another platform.");
-    return;
-#else
+// #ifndef ESP_CAMERA_SUPPORTED
+//     ESP_LOGE(TAG, "Code Written for AI Thinker ESP32 CAM, cannot run on another platform.");
+//     return;
+// #else
 
-    if (init_camera() != ESP_OK) {
+//     if (init_camera() != ESP_OK) {
+//         return;
+//     }
+    
+//     // Initialize storage
+//     esp_err_t retval = nvs_flash_init();
+//     if (retval == ESP_ERR_NVS_NO_FREE_PAGES || retval == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+//         ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_flash_erase());
+//         retval = nvs_flash_init();
+//     }
+//     ESP_ERROR_CHECK_WITHOUT_ABORT(retval);
+    
+//     // Connect to wifi
+//     wifi_connect();
+
+//     while (true) {
+//         ESP_LOGI(TAG, "Taking a picture...");
+        
+//         camera_fb_t *img_frame_buffer = esp_camera_fb_get();
+//         ESP_LOGI(TAG, "Image taken, %zu bytes", img_frame_buffer -> len);
+        
+//         esp_camera_fb_return(img_frame_buffer);
+//         vTaskDelay(5000 / portTICK_PERIOD_MS);
+//     }
+
+// #endif
+// }
+
+void app_main(void)
+{
+	esp_err_t status = WIFI_FAILURE;
+
+    #ifndef ESP_CAMERA_SUPPORTED
+        ESP_LOGE(TAG, "Code Written for AI Thinker ESP32 CAM, cannot run on another platform.");
         return;
-    }
-    
-    // Initialize storage
-    esp_err_t retval = nvs_flash_init();
-    if (retval == ESP_ERR_NVS_NO_FREE_PAGES || retval == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_flash_erase());
-        retval = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK_WITHOUT_ABORT(retval);
-    
-    // Connect to wifi
-    wifi_connect();
+    #else
+        if (init_camera() != ESP_OK) {
+            return;
+        }
 
-    while (true) {
-        ESP_LOGI(TAG, "Taking a picture...");
-        
-        camera_fb_t *img_frame_buffer = esp_camera_fb_get();
-        ESP_LOGI(TAG, "Image taken, %zu bytes", img_frame_buffer -> len);
-        
-        esp_camera_fb_return(img_frame_buffer);
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
-    }
+	//initialize storage
+        esp_err_t ret = nvs_flash_init();
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+            ESP_ERROR_CHECK(nvs_flash_erase());
+            ret = nvs_flash_init();
+        }
+        ESP_ERROR_CHECK_WITHOUT_ABORT(ret);
 
-#endif
+    // connect to wireless AP
+	    status = connect_wifi();
+	    if (WIFI_SUCCESS != status)
+	    {
+		    ESP_LOGI(TAG, "Failed to associate to AP, dying...");
+		    return;
+	    }
+	
+	// status = connect_tcp_server();
+	// if (TCP_SUCCESS != status)
+	// {
+	// 	ESP_LOGI(TAG, "Failed to connect to remote server, dying...");
+	// 	return;
+	// }
+
+    #endif
 }
