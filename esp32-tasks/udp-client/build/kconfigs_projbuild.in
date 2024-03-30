@@ -1,5 +1,0 @@
-source "C:/Users/Rajat/smart-scarecrow/lib/esp-idf/components/app_update/Kconfig.projbuild"
-source "C:/Users/Rajat/smart-scarecrow/lib/esp-idf/components/bootloader/Kconfig.projbuild"
-source "C:/Users/Rajat/smart-scarecrow/lib/esp-idf/components/esptool_py/Kconfig.projbuild"
-source "C:/Users/Rajat/smart-scarecrow/lib/esp-idf/components/partition_table/Kconfig.projbuild"
-source "C:/Users/Rajat/smart-scarecrow/esp32-tasks/udp-client/main/Kconfig.projbuild"
