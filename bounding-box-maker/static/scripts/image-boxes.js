@@ -150,7 +150,3 @@ function main() {
         accept_form.submit();            
     });
 }
-
-
-
-
