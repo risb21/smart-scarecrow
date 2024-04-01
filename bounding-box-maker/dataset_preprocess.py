@@ -46,6 +46,13 @@ def path_to_img(paths: list[(str, bool)] = [("./", False)]) -> list[(str, bool)]
     return paths
 
 def index_datasets() -> None:
+    """
+        - Goes into /static
+        - Unzips all dataset .zip files
+        - Recursively finds all directories with images
+        - Move all images to static/data
+        - Delete unzipped dataset directories
+    """
     os.chdir("./static")
     
     try:
@@ -58,7 +65,6 @@ def index_datasets() -> None:
             return
         
         zip_files = glob.glob("*.zip")
-        # zip_files = [file[:-4] for file in zip_files]
 
         if len(zip_files) == 0:
             print("\nThere are no datasets to index!\n")

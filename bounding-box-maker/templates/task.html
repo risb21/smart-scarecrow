@@ -14,22 +14,25 @@
     
     <br>
     <form method="post">
-        <input type="submit" value="Save Work">
+        <input class="other-btn" type="submit" value="Save Work">
         <input type="hidden" name="close">
     </form>
     <div style="height: 500px; width: fit-content;"><img id="image"
     src="{{ url_for('static', filename=img_file) }}" style="height: 100%; display: block;"
-    ><div id="canvas" style="width: auto; position: relative;"></div></div><br><br>
-    <button onclick="undo()">Undo</button>
-    <form method="post" id="accept">
-        <input type="button" id="accept-btn" value="Accept Boxes">
-        <input type="hidden" name="accept">
-    </form>
-    <form method="post" id="discard">
-        <input type="submit" value="Discard">
-        <input type="hidden" name="discard">
-    </form>
-    <script src="static/scripts/image-boxes.js"></script>
+    ><div id="canvas" style="width: auto; position: relative;"></div><br><br>
+        <div style="width: inherit; height: auto;">
+            <button class="btn" onclick="undo()">Undo</button><br>
+            <form method="post" id="accept" style="float: left;">
+                <input class="btn" type="button" id="accept-btn" value="Accept Boxes">
+                <input type="hidden" name="accept">
+            </form>
+            <form method="post" id="discard" style="float: right;">
+                <input class="btn" type="submit" id="discard-btn" value="Discard">
+                <input type="hidden" name="discard">
+            </form>
+            <script src="static/scripts/image-boxes.js"></script>
+        </div>
+    </div>
 </body>
 <style>
     .boxes {
@@ -42,6 +45,34 @@
         -webkit-user-drag: none;
         user-select: none;
         -moz-user-select: none;
+    }
+
+    .btn, .other-btn {
+        padding: 1em 1em 1em 1em;
+        margin: 0 4rem 2rem 0;
+        font-size: medium;
+    }
+
+    input.btn {
+        border: none;
+        border-radius: 5px;
+        color: white;
+    }
+
+    input#accept-btn {
+        background-color: rgb(83, 208, 83);
+    }
+
+    input#accept-btn:hover {
+        background-color: rgb(68, 161, 68);
+    }
+
+    input#discard-btn {
+        background-color: rgb(210, 67, 67);
+    }
+
+    input#discard-btn:hover {
+        background-color: rgb(157, 53, 53);
     }
 
 </style>

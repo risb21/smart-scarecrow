@@ -7,12 +7,22 @@
 </head>
 <body>
     Hello Hi <br>
-    <label for="name">Select User: </label><br>
+    <label for="name">Select User: </label><br><br>
     {% for user in users %}
     <form method="post">
-        <input type="submit" value="{{ user }}"/>
+        <input class="btn" type="submit" value="{{ user }}"/>
         <input type="hidden" name="{{ user }}"/>
     </form>
     {% endfor %}
 </body>
+
+<style>
+
+    .btn {
+        padding: 1em 1em 1em 1em;
+        margin: 0 4rem 2rem 0;
+        font-size: medium;
+    }
+
+</style>
 </html>

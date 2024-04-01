@@ -1,4 +1,3 @@
-# import flask
 from flask import *
 from flask_session import Session
 import time
@@ -11,8 +10,8 @@ from dataset_preprocess import index_datasets
 from work_distribution import get_work
 from boxes_csv_handle import get_index, file_closed
 
+""" Flask Setup (application and session) """
 random.seed(time.time_ns())
-
 application = Flask(__name__)
 application.secret_key = random.randint(1, 1 << 31)
 application.config["SESSION_TYPE"] = "filesystem"
@@ -51,6 +50,7 @@ def task():
     global boxes_file, start_idx
     csv_path = f"./static/{session['user'].name}_boxes.csv"
 
+    """ Open the csv file if it is closed, whether initialized or not """
     if file_closed(boxes_file) or boxes_file.name != csv_path:
         if boxes_file.closed == True or boxes_file.closed == False:
             boxes_file.close()
@@ -62,6 +62,8 @@ def task():
 
     if request.method  == 'POST':
         command = list(request.form.to_dict().keys())[0]
+
+        # Close file handle and save work
         if 'close' == command:
             boxes_file.close()
             return redirect(url_for('end'))
@@ -69,6 +71,7 @@ def task():
         writer = csv.writer(boxes_file)
         to_write: list[str] = [session['user'].task[start_idx]]
 
+        # Write bounding boxes to csv file
         if 'accept' == command:
             # Get data from form, append to csv file            
             if "data" in request.form.to_dict().keys():
@@ -83,6 +86,7 @@ def task():
             start_idx += 1
             return redirect(url_for('task'))
         
+        # Invalid image, ignore for training
         if 'discard' == command:
             # Mark the no. of boxes in csv -1, for invalid image
             to_write.append("-1")
@@ -90,7 +94,6 @@ def task():
             start_idx += 1
             return redirect(url_for('task'))
             
-
     elif request.method == 'GET':
         if "user" in session:
             return render_template(

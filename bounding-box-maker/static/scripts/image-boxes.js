@@ -24,6 +24,11 @@ let rects = [];
 let drag = false;
 
 function mousedown(e) {
+    // if not a left click
+    if (e.button != 0) {
+        return;
+    }
+
     rects.push(new rect(
         e.pageX - this.offsetLeft,
         e.pageY - this.offsetTop,
@@ -102,7 +107,6 @@ function main() {
     accept_form = document.getElementById("accept");
 
     if (image.complete) {
-        console.log("Image is already loaded");
         setup_canvas();
     } else {
         image.addEventListener('load', setup_canvas);
@@ -143,7 +147,6 @@ function main() {
 
             accept_form.appendChild(data_input);
         }
-        // console.log("done");
         accept_form.submit();            
     });
 }
