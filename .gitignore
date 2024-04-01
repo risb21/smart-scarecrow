@@ -34,4 +34,5 @@
 build/
 .vscode
 
+**/server_config.h
 **/wifi_config.h

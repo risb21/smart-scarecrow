@@ -1,17 +1,48 @@
 #include "wifi_config.h"
 #include "wifi_connection.h"
 
+// task tag
+static const char *TAG = "WIFI";
 
+// event group to contain status information
+static EventGroupHandle_t wifi_event_group;
+
+static int s_retry_num = 0;
 
 /** FUNCTIONS **/
+
+void wifi_ip_address_clear() {
+    if (wifi_ip_addr != NULL) {
+        free(wifi_ip_addr);
+        wifi_ip_addr = NULL;
+    }
+
+    if (wifi_ip_broadcast != NULL) {
+        free(wifi_ip_broadcast);
+        wifi_ip_broadcast = NULL;
+    }
+}
+
+/**
+ * parse IP address to char* and create a broadcast IP address for current subnet
+*/
+void wifi_ip_address_save(esp_ip4_addr_t ip) {
+    int ipSize = 16;
+    wifi_ip_addr = (char *) malloc(ipSize);
+    wifi_ip_broadcast = (char *) malloc(ipSize);
+    snprintf(wifi_ip_addr, ipSize, IPSTR, IP2STR(&ip));
+    snprintf(wifi_ip_broadcast, ipSize, IPSTR, esp_ip4_addr1_16(&ip), esp_ip4_addr2_16(&ip), esp_ip4_addr3_16(&ip), 255);
+}
 
 //event handler for wifi events
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data) {
 	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+        wifi_ip_address_clear();
 		ESP_LOGI(TAG, "Connecting to AP...");
 		esp_wifi_connect();
 	} else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        wifi_ip_address_clear();
 		if (s_retry_num < MAX_FAILURES) {
 			ESP_LOGI(TAG, "Reconnecting to AP...");
 			esp_wifi_connect();
@@ -26,8 +57,10 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
 static void ip_event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data) {
 	if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        wifi_ip_address_clear();
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "STA IP: " IPSTR, IP2STR(&event->ip_info.ip));
+        wifi_ip_address_save(event -> ip_info.ip);
         s_retry_num = 0;
         xEventGroupSetBits(wifi_event_group, WIFI_SUCCESS);
     }

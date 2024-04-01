@@ -100,6 +100,8 @@ static camera_config_t camera_config = {
     .grab_mode = CAMERA_GRAB_WHEN_EMPTY,
 };
 
+static const char *TAG = "UDP-Client";
+
 static esp_err_t init_camera(void) {
     esp_err_t err = esp_camera_init(&camera_config);
     if (err != ESP_OK) {
@@ -133,9 +135,25 @@ void app_main(void){
     // connect to wireless AP
 	    status = connect_wifi();
 	    if (WIFI_SUCCESS != status){
-		    ESP_LOGI(TAG, "Failed to associate to AP, dying...");
-		    return;
+		    ESP_LOGE(TAG, "Failed to associate to AP, dying...");
+            for (;;) {
+                vTaskDelay(5000 / portTICK_PERIOD_MS);        
+            }
 	    }
+
+        if (wifi_ip_addr != NULL) {
+            ESP_LOGI(TAG, "Connected to the internet! IP Address: %s", wifi_ip_addr);
+        }
+
+        while (true) {
+            ESP_LOGI(TAG, "Taking a picture...");
+
+            camera_fb_t *img_frame_buffer = esp_camera_fb_get();
+            ESP_LOGI(TAG, "Image taken, %zu bytes", img_frame_buffer -> len);
+
+            esp_camera_fb_return(img_frame_buffer);
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+        }
 	
 	
 

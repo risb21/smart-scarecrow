@@ -22,21 +22,9 @@
 #include "lwip/netdb.h"
 #include "lwip/dns.h"
 
-
-// event group to contain status information
-static EventGroupHandle_t wifi_event_group;
-
-// retry tracker
-static int s_retry_num = 0;
-
-// task tag
-static const char *TAG = "WIFI";
-
-extern char *wifi_ip_addr;
-extern char *wifi_ip_broadcast;
+char *wifi_ip_addr;
+char *wifi_ip_broadcast;
 
 esp_err_t connect_wifi();
-
-void wifi_connect();
 
 #endif
