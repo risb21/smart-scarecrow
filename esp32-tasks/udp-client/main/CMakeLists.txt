@@ -12,7 +12,9 @@ set(srcs
   ../wifi_conn/wifi_config.h
   ../wifi_conn/wifi_connection.c
   ../wifi_conn/wifi_connection.h
-  server_config.h
+  ../UDP_sockets/udp_socket.c
+  ../UDP_sockets/udp_socket.h
+  ../UDP_sockets/server_config.h
   )
 
 set(priv_include_dirs

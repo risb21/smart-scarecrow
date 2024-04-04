@@ -11,6 +11,7 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 #include "../wifi_conn/wifi_connection.h"
+#include "../UDP_sockets/udp_socket.h"
 
 #include <stdio.h>
 #include <sys/param.h>
@@ -124,7 +125,7 @@ void app_main(void){
             return;
         }
 
-	//initialize storage
+	    //initialize storage
         esp_err_t ret = nvs_flash_init();
         if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
             ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_flash_erase());
@@ -132,7 +133,7 @@ void app_main(void){
         }
         ESP_ERROR_CHECK_WITHOUT_ABORT(ret);
 
-    // connect to wireless AP
+        // connect to wireless AP
 	    status = connect_wifi();
 	    if (WIFI_SUCCESS != status){
 		    ESP_LOGE(TAG, "Failed to associate to AP, dying...");
@@ -145,6 +146,9 @@ void app_main(void){
             ESP_LOGI(TAG, "Connected to the internet! IP Address: %s", wifi_ip_addr);
         }
 
+        xTaskCreate(udp_client_task, "udp-client", 4096, NULL, 5, NULL);
+
+        
         while (true) {
             ESP_LOGI(TAG, "Taking a picture...");
 
@@ -154,8 +158,6 @@ void app_main(void){
             esp_camera_fb_return(img_frame_buffer);
             vTaskDelay(5000 / portTICK_PERIOD_MS);
         }
-	
-	
-
+        
     #endif
 }

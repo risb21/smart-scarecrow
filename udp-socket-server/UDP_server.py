@@ -3,8 +3,8 @@ import socket
 server_port = 2048
 buffer_size = 1024  #Bytes
 
-def main():
-
+def main() -> None:
+    
     """ Get IP Address of server """
     ip_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ip_sock.connect(('10.0.0.0', 0))
@@ -12,11 +12,16 @@ def main():
     ip_sock.close()
 
     """ Setup UDP Server """
-    # server_addr = (server_ip, server_sock)
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # Listen for all IP addresses trying to connect
     server_sock.bind(("", server_port))
     print(f"Server ({server_ip}:{server_port}) listening for connections...")
+    
+    print("\nCopy and paste the following code into the server_config.h header file:\n")
+    print("#ifndef SERVER_CONFIG_H\n#define SERVER_CONFIG_H\n")
+    print(f"#define SERVER_IP \"{server_ip}\"")
+    print(f"#define SERVER_PORT {server_port}")
+    print("\n#endif")
 
     while True:
         (message, client_addr) = server_sock.recvfrom(buffer_size)
