@@ -138,7 +138,7 @@ void app_main(void){
 	    if (WIFI_SUCCESS != status){
 		    ESP_LOGE(TAG, "Failed to associate to AP, dying...");
             for (;;) {
-                vTaskDelay(5000 / portTICK_PERIOD_MS);        
+                vTaskDelay((TickType_t) 5000 / portTICK_PERIOD_MS);        
             }
 	    }
 
@@ -146,16 +146,29 @@ void app_main(void){
             ESP_LOGI(TAG, "Connected to the internet! IP Address: %s", wifi_ip_addr);
         }
 
-        xTaskCreate(udp_client_task, "udp-client", 4096, NULL, 5, NULL);
+        camera_data_t camera_data;
+        camera_data.has_data = false;
+        camera_data.in_use_mtx = xSemaphoreCreateMutex();
+
+        xTaskCreate(udp_client_task, "udp-client", 4096, (void *) &camera_data, 5, NULL);
 
         
         while (true) {
+            // Block for 10 ms, continue with camera capture
+            if (xSemaphoreTake(camera_data.in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) != pdTRUE) {
+                // Wait and retry if mutex is not free
+                vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
+                continue;
+            }
+            
             ESP_LOGI(TAG, "Taking a picture...");
 
             camera_fb_t *img_frame_buffer = esp_camera_fb_get();
             ESP_LOGI(TAG, "Image taken, %zu bytes", img_frame_buffer -> len);
 
             esp_camera_fb_return(img_frame_buffer);
+
+            xSemaphoreGive(camera_data.in_use_mtx);
             vTaskDelay(5000 / portTICK_PERIOD_MS);
         }
         

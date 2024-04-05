@@ -105,7 +105,7 @@ esp_err_t connect_wifi() {
     /** START THE WIFI DRIVER **/
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid =WIFI_SSID,
+            .ssid = WIFI_SSID,
             .password = WIFI_PW,
 	     .threshold.authmode = WIFI_AUTH_WPA2_PSK,
             .pmf_cfg = {

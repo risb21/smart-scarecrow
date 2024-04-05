@@ -3,13 +3,17 @@
 
 static const char *TAG = "UDP Socket Connection";
 static const char *payload = "Is this working?";
+camera_data_t *camera_data;
+// SemaphoreHandle_t camera_data -> in_use_mtx;
 
 void udp_client_task(void *param_args) {
+
     char rx_buffer[128];
     char server_ip[] = SERVER_IP;
     int addr_family = 0;
     int ip_protocol = 0; // UDP
     struct sockaddr_in server_addr;
+    camera_data = (camera_data_t *) param_args;
 
     while (1) {
         struct sockaddr_in *server = &server_addr;
@@ -39,6 +43,13 @@ void udp_client_task(void *param_args) {
         setsockopt(client_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
         while (1) {
+            // Block for 10 ms, continue with transfer if free
+            if (xSemaphoreTake(camera_data -> in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) == pdFALSE) {
+                // Wait and retry if mutex is not free
+                vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
+                continue;
+            }
+
             int err = sendto(
                 client_sock, payload, strlen(payload), 0,
                 (struct sockaddr *) &server_addr, sizeof(server_addr)
@@ -46,6 +57,7 @@ void udp_client_task(void *param_args) {
             
             if (err < 0) {
                 ESP_LOGE(TAG, "Could not send message to server");
+                xSemaphoreGive(camera_data -> in_use_mtx);
                 break;
             } 
             ESP_LOGI(TAG, "Message sent");
@@ -59,17 +71,16 @@ void udp_client_task(void *param_args) {
 
             if (len < 0) {
                 ESP_LOGE(TAG, "recvfrom failed");
+                xSemaphoreGive(camera_data -> in_use_mtx);
                 break;
             } else {
                 rx_buffer[len] = 0; // Null terminate string received
                 ESP_LOGI(TAG, "Received %d bytes from host %s:", len, server_ip);
                 ESP_LOGI(TAG, "%s", rx_buffer);
-                if (lwip_strnicmp(rx_buffer, "OK", 2) == 0) {
-                    ESP_LOGI(TAG, "Received expected message, reconnecting...");
-                    break;
-                }
             }
 
+            ESP_LOGI(TAG, "Checking param bool value: %d", camera_data -> has_data);
+            xSemaphoreGive(camera_data -> in_use_mtx);
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
 

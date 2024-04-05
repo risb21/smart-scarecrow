@@ -21,6 +21,7 @@ def main() -> None:
     print("#ifndef SERVER_CONFIG_H\n#define SERVER_CONFIG_H\n")
     print(f"#define SERVER_IP \"{server_ip}\"")
     print(f"#define SERVER_PORT {server_port}")
+    print(f"#define SERVER_BUFF_SIZE {buffer_size} \\\\ in Bytes")
     print("\n#endif")
 
     while True:
