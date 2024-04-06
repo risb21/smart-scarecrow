@@ -19,9 +19,12 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
+#include "esp_camera.h"
+
 typedef struct {
     bool has_data;
     SemaphoreHandle_t in_use_mtx;
+    camera_fb_t *cam_frame_buf;
 } camera_data_t;
 
 void udp_client_task(void *param_args);

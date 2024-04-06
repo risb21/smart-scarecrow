@@ -33,6 +33,7 @@
 
 build/
 .vscode
+*venv
 
 **/server_config.h
 **/wifi_config.h

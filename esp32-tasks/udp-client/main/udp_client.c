@@ -121,8 +121,10 @@ void app_main(void){
         ESP_LOGE(TAG, "Code Written for AI Thinker ESP32 CAM, cannot run on another platform.");
         return;
     #else
+
         if (init_camera() != ESP_OK) {
-            return;
+            ESP_LOGE(TAG, "Could not initialize camera, dying...");
+            goto death;
         }
 
 	    //initialize storage
@@ -137,9 +139,7 @@ void app_main(void){
 	    status = connect_wifi();
 	    if (WIFI_SUCCESS != status){
 		    ESP_LOGE(TAG, "Failed to associate to AP, dying...");
-            for (;;) {
-                vTaskDelay((TickType_t) 5000 / portTICK_PERIOD_MS);        
-            }
+            goto death;
 	    }
 
         if (wifi_ip_addr != NULL) {
@@ -149,6 +149,7 @@ void app_main(void){
         camera_data_t camera_data;
         camera_data.has_data = false;
         camera_data.in_use_mtx = xSemaphoreCreateMutex();
+        camera_data.cam_frame_buf = NULL;
 
         xTaskCreate(udp_client_task, "udp-client", 4096, (void *) &camera_data, 5, NULL);
 
@@ -163,14 +164,23 @@ void app_main(void){
             
             ESP_LOGI(TAG, "Taking a picture...");
 
-            camera_fb_t *img_frame_buffer = esp_camera_fb_get();
-            ESP_LOGI(TAG, "Image taken, %zu bytes", img_frame_buffer -> len);
+            camera_data.cam_frame_buf = esp_camera_fb_get();
+            ESP_LOGI(TAG, "Image taken, %zu bytes", camera_data.cam_frame_buf -> len);
+            ESP_LOGI(TAG, "%dX%d pixels", camera_data.cam_frame_buf -> width, camera_data.cam_frame_buf -> height);
 
-            esp_camera_fb_return(img_frame_buffer);
+            esp_camera_fb_return(camera_data.cam_frame_buf);
 
             xSemaphoreGive(camera_data.in_use_mtx);
             vTaskDelay(5000 / portTICK_PERIOD_MS);
         }
         
+        return;
+
+        death:
+        {
+            for (;;) {
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
+            }
+        }
     #endif
 }
