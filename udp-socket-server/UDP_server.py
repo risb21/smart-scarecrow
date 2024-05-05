@@ -1,8 +1,42 @@
 import socket
+import matplotlib.image
 import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+import cv2 as cv
+from PIL import Image
+import io
+
 
 server_port = 2048
-buffer_size = 4096  #Bytes
+buffer_size = 1 << 13  # Bytes
+
+def format_pixels(width: int, height: int, length: int, raw_data):
+    if len(raw_data) != length:
+        return []
+    
+    pixels = []
+
+    for row in range(height):
+        temp = []
+        for col in range(width):
+            byte_1 = raw_data[(row * width + col) * 2 + 0]
+            byte_2 = raw_data[(row * width + col) * 2 + 1]
+            
+            red = (byte_1 >> 3)
+            blue = (byte_1 & 0x07) << 3 | byte_2 >> 5
+            green = byte_2 & 0x1F
+
+            # convert to 8 bit int
+            red = int(red / (1 << 5) * 256)
+            blue = int(blue / (1 << 6) * 256)
+            green = int(green / (1 << 5) * 256)
+            temp.append((green, blue, red))
+        pixels.append(temp)
+    
+    # print(pixels)
+    return np.array(pixels, dtype=np.uint8)
+
 
 def main() -> None:
     
@@ -22,42 +56,72 @@ def main() -> None:
     print("#ifndef SERVER_CONFIG_H\n#define SERVER_CONFIG_H\n")
     print(f"#define SERVER_IP \"{server_ip}\"")
     print(f"#define SERVER_PORT {server_port}")
-    print(f"#define SERVER_BUFF_SIZE {buffer_size} \\\\ in Bytes")
+    print(f"#define SERVER_BUFF_SIZE {buffer_size-36} // in Bytes")
     print("\n#endif")
 
     display_once = False
+    get_dims = True
+    x_dim, y_dim, arr_len = 0, 0, 0
     image = []
+    idk: None | matplotlib.image.AxesImage = None
     while True:
         (message, client_addr) = server_sock.recvfrom(buffer_size)
         (client_ip, client_port) = client_addr
 
         if message == b"DONE" :
-            if not display_once:
-                # print(len(image))
-                # print(image[0:2])
-                plt.imshow(image)
-                plt.show()
-                # pass
-            server_sock.sendto(f"OK".encode('utf-8'), client_addr)
+            if not idk:
+                # print()
+                if len(image) == arr_len and len(image) > 0:
+                    byte_stream = io.BytesIO(bytearray(image))
+                    img = Image.open(byte_stream)
+                    img = list(img.getdata())
+                    what = max([max(i) for i in img])
+                    img = [tuple([max(min(int(x/what * 256), 255), 0) for x in i][::-1]) for i in img]
+                    img = [img[i * x_dim:(i + 1) * x_dim] for i in range(y_dim)]
+                    img_data: np.ndarray = np.array(img, dtype=np.uint8)
+                    # img_data = img_data.reshape((x_dim, y_dim, 3))
+                    # print(x_dim, y_dim, arr_len, image)
+                    # formatted = format_pixels(x_dim, y_dim, arr_len, image)
+                    # if len(formatted) != 0:
+                        # img = Image.frombytes("")
+                    # print(len(image), arr_len)
+                    cv.imshow("camera", img_data)
+                    cv.waitKey(100)
+                    # plt.imshow(formatted)
+                    # print(idk)
+                    # print(type(idk))
+                    # plt.show()
+            else:
+                print("Attempting to update image")
+                idk.set_data(format_pixels(x_dim, y_dim, arr_len, image))
+                plt.draw()
+            image = []
+            # server_sock.sendto(f"OK".encode('utf-8'), client_addr)
             display_once = True
+            get_dims = True
             continue
 
         try:
-            message = message.decode("ASCII")
-            row = eval(message)
-            image.append([(int(red*256/(1<<5)), int(green*256/(1<<6)), int(blue*256/(1<<5))) for (red, green, blue) in row])
+            if get_dims:
+                message = message.decode("ASCII")
+                dims_n_len = message.split(" ")
+                arr_len = int(dims_n_len[1])
+                dims = dims_n_len[0].split("x")
+                x_dim = int(dims[0])
+                y_dim = int(dims[1])
+                get_dims = False
+
+            else:
+                # row = eval(message)
+                image.extend(list(message))
             
-            server_sock.sendto(f"OK".encode('utf-8'), client_addr)
+            # server_sock.sendto(f"OK".encode('utf-8'), client_addr)
         except Exception as e:
             # Could not eval
-            print("Does it reach here")
-            server_sock.sendto(f"RESEND".encode('utf-8'), client_addr)
-            # raise e
+            # server_sock.sendto(f"RESEND".encode('utf-8'), client_addr)
+            print(e)
 
-        # print(f"Message from client: {message}")
-        # print(f"Client IP Address: {client_ip}:{client_port}")
-
-        server_sock.sendto(f"Hello, {client_ip}:{client_port}!".encode('utf-8'), client_addr)
+        # server_sock.sendto(f"OK".encode('utf-8'), client_addr)
 
 if __name__ == "__main__":
     main()

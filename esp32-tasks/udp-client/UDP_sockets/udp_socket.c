@@ -2,72 +2,31 @@
 #include "server_config.h"
 
 static const char *TAG = "UDP Socket Connection";
-static const char *payload = "Is this working?";
 static const char *done_message = "DONE";
 camera_data_t *camera_data;
 
-// #define OUTER_BRACES "[%s]"
-#define DEF_PIXEL    "(%d,%d,%d),"
-// #define APPEND       "%s,%s"
-#define SERVER_RX_LIMIT 4096
 
-char* get_payload(camera_fb_t *cam_fb, int row_no) {
+// Returns length of payload, and pointer to data in *data
+int get_raw_payload(camera_fb_t *cam_fb, int start_fb, uint8_t *data) {
     sensor_t* sensor_data = esp_camera_sensor_get();
     if (!sensor_data) {
-        return NULL;
+        return -1;
     }
 
-    if (sensor_data -> pixformat != PIXFORMAT_RGB565) {
-        ESP_LOGE(TAG, "Other pixel formats are not implemented, returning empty string");
-        return NULL;
+    // if (sensor_data -> pixformat != PIXFORMAT_RGB565 || sensor_data -> pixformat != PIXFORMAT_JPEG) {
+    //     ESP_LOGE(TAG, "Other pixel formats are not implemented");
+    //     return -1;
+    // }
+
+    int data_len = cam_fb -> len;
+
+    for (int i = start_fb;
+         i < ((data_len > start_fb + SERVER_BUFF_SIZE) ?
+              start_fb + SERVER_BUFF_SIZE  :  data_len); i++) {
+        data[i - start_fb] = cam_fb -> buf[i];
     }
 
-    // 8192 bytes for max rx limit server-side
-    char *row = (char *) malloc(SERVER_RX_LIMIT * sizeof(char));
-    row[0] = '[';
-    int row_ptr = 1;
-
-    /*
-        // finding max length of string to be sent
-        // () + 3x 2 digit 8-bit nos, with 2 ',' separating them.
-        int max_pix_len = 2 + 3*2 + 2;
-        // [] + no. of pixels in a row * nomax_pix_len + 
-        // (no. of pixels in a row - 1) ',' separating them
-        int max_row_len = 2 + width * max_pix_len + (width-1);
-        // ESP_LOGI(TAG, "Max size of row of pixels: %d bytes", max_row_len);
-    */
-
-    int width = cam_fb -> width;
-    // each pixel is 2 bytes, getting how many rows to skip in indices
-    int rows_skipped = (row_no * width *2);
-    for (int w = 0; w < width; w++) {
-        //    Byte 1       |     Byte 2
-        // x x x x x x x x | x x x x x x x x
-        //  Red(5)  |   Green(6)  |  Blue(5)
-        u8_t B1 = cam_fb -> buf[rows_skipped + 2*w + 0];
-        u8_t B2 = cam_fb -> buf[rows_skipped + 2*w + 1];
-
-        // Keep first 5 bits of B1
-        u8_t red = B1 >> 3;
-        // keep last 3 bits of B1, then put in position
-        // push first 3 bits of B2 to the end & join them together
-        u8_t green = (B1 & 0x07) << 3 | B2 >> 5;
-        // Keep last 5 bits of B2
-        u8_t blue = B2 & 0x1F;
-
-        row_ptr += snprintf(row + row_ptr, SERVER_RX_LIMIT, DEF_PIXEL, red, green, blue);
-    }
-    row[row_ptr - 1] = ']';
-    // Null terminate string
-    row[row_ptr] = '\0';
-
-    // ESP_LOGI(TAG, "Row string generated:");
-    // ESP_LOGI(TAG, "%s", row);
-    // ESP_LOGI(TAG, "Row string length: %d bytes", row_ptr);    
-
-    // free(row);
-
-    return row;
+    return (data_len > start_fb + SERVER_BUFF_SIZE) ? SERVER_BUFF_SIZE : data_len - start_fb;
 }
 
 void udp_client_task(void *param_args) {
@@ -102,9 +61,12 @@ void udp_client_task(void *param_args) {
 
         // Setting timeout
         struct timeval timeout;
-        timeout.tv_sec = 10;
+        timeout.tv_sec = 5;
         timeout.tv_usec = 0;
         setsockopt(client_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+        int end_delim = 0;
+        char dimensions_str[40];
 
         while (1) {
             // Block for 10 ms, continue with transfer if free
@@ -122,51 +84,69 @@ void udp_client_task(void *param_args) {
                 break;
             }
 
-            for (int h = 0; h < cam_frame_buff -> height; h++) {
-                char* row_payload = get_payload(cam_frame_buff, h);
+            int fb_len = cam_frame_buff -> len;
+
+            // Preliminary packet to indicate image size and dimensions
+            end_delim = snprintf(
+                dimensions_str, 40, "%zux%zu %zu",
+                cam_frame_buff -> width,
+                cam_frame_buff -> height,
+                fb_len
+            );
+
+            dimensions_str[end_delim] = '\0';
+
+            int send_err = sendto(
+                client_sock, dimensions_str, strlen(dimensions_str), 0,
+                (struct sockaddr *) &server_addr, sizeof(server_addr)
+            );
+
+            if (send_err < 0) {
+                esp_camera_fb_return(cam_frame_buff);
+                xSemaphoreGive(camera_data -> in_use_mtx);
+                ESP_LOGE(TAG, "Unable to send dimension/image size data, retyring...");
+                continue;
+            }
+            
+            struct sockaddr_storage src_addr_dim;
+            socklen_t dim_socklen = sizeof(src_addr_dim);
+            int recv_len = recvfrom(
+                client_sock, rx_buffer, sizeof(rx_buffer)-1,
+                0, (struct sockaddr *) &src_addr_dim, &dim_socklen
+            );
+
+            rx_buffer[recv_len] = '\0';
+
+            int chunks = (int) (fb_len / SERVER_BUFF_SIZE);
+            uint8_t *raw_payload = (uint8_t *) malloc((SERVER_BUFF_SIZE) * sizeof(uint8_t));
+
+            for (int i = 0;
+                 i < chunks + (
+                    (fb_len % SERVER_BUFF_SIZE) > 0 ? 1 : 0
+                 ); i++) {
                 
-                if (!row_payload) {
-                    h--;
+                int len = get_raw_payload(cam_frame_buff, i * SERVER_BUFF_SIZE, raw_payload);
+
+                if (len < 0) {
+                    i--;
+                    ESP_LOGE(TAG, "Unable to get raw payload");
                     continue;
                 }
 
                 int err = sendto(
-                    client_sock, row_payload, strlen(row_payload), 0,
+                    client_sock, raw_payload, len, 0,
                     (struct sockaddr *) &server_addr, sizeof(server_addr)
                 );
 
-                free(row_payload);
-
                 if (err < 0) {
-                    h--;
-                    continue;
-                }
-
-                struct sockaddr_storage source_addr;
-                socklen_t socklen = sizeof(source_addr);
-                int len = recvfrom(
-                    client_sock, rx_buffer, sizeof(rx_buffer)-1,
-                    0, (struct sockaddr *) &source_addr, &socklen
-                );
-
-                if (len < 0) {
-                    h--;
-                    continue;
-                }
-
-                rx_buffer[len] = 0; // Null terminate string received
-                ESP_LOGI(TAG, "Received %d bytes from host %s:", len, server_ip);
-                ESP_LOGI(TAG, "%s", rx_buffer);
-
-                // Only resend if requested by server
-                if (len == strlen("RESEND") && strcmp(rx_buffer, "RESEND") != 0) {
-                    h--;
+                    i--;
+                    ESP_LOGE(TAG, "Unable to send image payload: %d", errno);
                     continue;
                 }
             }
 
+            free(raw_payload);
             esp_camera_fb_return(cam_frame_buff);
-
 
             int err = sendto(
                 client_sock, done_message, strlen(done_message), 0,
@@ -180,26 +160,8 @@ void udp_client_task(void *param_args) {
                 );
             }
 
-            ESP_LOGI(TAG, "Message sent");
+            ESP_LOGI(TAG, "Image sent");
 
-            struct sockaddr_storage source_addr;
-            socklen_t socklen = sizeof(source_addr);
-            int len = recvfrom(
-                client_sock, rx_buffer, sizeof(rx_buffer)-1,
-                0, (struct sockaddr *) &source_addr, &socklen
-            );
-
-            if (len < 0) {
-                ESP_LOGE(TAG, "recvfrom failed");
-                xSemaphoreGive(camera_data -> in_use_mtx);
-                break;
-            } else {
-                rx_buffer[len] = 0; // Null terminate string received
-                ESP_LOGI(TAG, "Received %d bytes from host %s:", len, server_ip);
-                ESP_LOGI(TAG, "%s", rx_buffer);
-            }
-
-            // ESP_LOGI(TAG, "Checking param bool value: %d", camera_data -> has_data);
             xSemaphoreGive(camera_data -> in_use_mtx);
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
@@ -209,6 +171,8 @@ void udp_client_task(void *param_args) {
             shutdown(client_sock, 0);
             close(client_sock);
         }
+
+        // vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 
     vTaskDelete(NULL);

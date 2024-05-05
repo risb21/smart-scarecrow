@@ -92,7 +92,7 @@ static camera_config_t camera_config = {
     .ledc_timer = LEDC_TIMER_0,
     .ledc_channel = LEDC_CHANNEL_0,
 
-    .pixel_format = PIXFORMAT_RGB565, //YUV422,GRAYSCALE,RGB565,JPEG
+    .pixel_format = PIXFORMAT_JPEG, //YUV422,GRAYSCALE,RGB565,JPEG
     .frame_size = FRAMESIZE_QVGA,    //QQVGA-UXGA, For ESP32, do not use sizes above QVGA when not JPEG. The performance of the ESP32-S series has improved a lot, but JPEG mode always gives better frame rates.
 
     .jpeg_quality = 6, //0-63, for OV series camera sensors, lower number means higher quality
@@ -147,7 +147,7 @@ void app_main(void){
         }
 
         camera_data_t camera_data;
-        camera_data.has_data = false;
+        // camera_data.has_data = false;
         camera_data.in_use_mtx = xSemaphoreCreateMutex();
         camera_data.cam_frame_buf = NULL;
 
@@ -156,22 +156,23 @@ void app_main(void){
         
         while (true) {
             // Block for 10 ms, continue with camera capture
-            if (xSemaphoreTake(camera_data.in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) != pdTRUE) {
-                // Wait and retry if mutex is not free
-                vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
-                continue;
-            }
+            // if (xSemaphoreTake(camera_data.in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) != pdTRUE) {
+            //     // Wait and retry if mutex is not free
+            //     vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
+            //     continue;
+            // }
             
-            ESP_LOGI(TAG, "Taking a picture...");
+            // ESP_LOGI(TAG, "Taking a picture...");
 
-            camera_data.cam_frame_buf = esp_camera_fb_get();
-            ESP_LOGI(TAG, "Image taken, %zu bytes", camera_data.cam_frame_buf -> len);
-            ESP_LOGI(TAG, "%dX%d pixels", camera_data.cam_frame_buf -> width, camera_data.cam_frame_buf -> height);
+            // camera_data.cam_frame_buf = esp_camera_fb_get();
+            // ESP_LOGI(TAG, "Image taken, %zu bytes", camera_data.cam_frame_buf -> len);
+            // ESP_LOGI(TAG, "%dX%d pixels", camera_data.cam_frame_buf -> width, camera_data.cam_frame_buf -> height);
 
-            esp_camera_fb_return(camera_data.cam_frame_buf);
+            // esp_camera_fb_return(camera_data.cam_frame_buf);
 
-            xSemaphoreGive(camera_data.in_use_mtx);
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            // xSemaphoreGive(camera_data.in_use_mtx);
+            ESP_LOGI(TAG, "Main Thread kept alive");
+            vTaskDelay(7500 / portTICK_PERIOD_MS);
         }
         
         return;
