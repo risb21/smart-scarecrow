@@ -1,11 +1,4 @@
 
-
-# set(srcs
-#     "udp_socket.c"
-#     "udp_socket.h"
-#     "server_config.h"
-# )
-
 set(srcs
     "udp_socket.c"
     "udp_socket.h"
@@ -15,12 +8,6 @@ set(srcs
   ../../../lib/esp32-camera/conversions/to_bmp.c
   ../../../lib/esp32-camera/conversions/jpge.cpp
   ../../../lib/esp32-camera/conversions/esp_jpg_decode.c
-#   ../wifi_conn/wifi_config.h
-#   ../wifi_conn/wifi_connection.c
-#   ../wifi_conn/wifi_connection.h
-#   ../UDP_sockets/udp_socket.c
-#   ../UDP_sockets/udp_socket.h
-#   ../UDP_sockets/server_config.h
   )
 
 set(priv_include_dirs
@@ -115,10 +102,3 @@ idf_component_register(
   REQUIRES driver nvs_flash esp_wifi # due to include of driver/gpio.h in esp_camera.h
   PRIV_REQUIRES ${priv_requires}
 )
-
-# idf_components_register(
-#     SRCS ${srcs}
-#     REQUIRES esp_wifi nvs_flash
-#     INCLUDE_DIRS "."
-# )
-

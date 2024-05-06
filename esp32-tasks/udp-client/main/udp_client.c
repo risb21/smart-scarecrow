@@ -11,7 +11,8 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 #include "../wifi_conn/wifi_connection.h"
-#include "../UDP_sockets/udp_socket.h"
+#include "../udp_client/udp_socket.h"
+#include "../servo_control/servo_controller.h"
 
 #include <stdio.h>
 #include <sys/param.h>
@@ -52,20 +53,16 @@
 #define CAM_PIN_HREF 23
 #define CAM_PIN_PCLK 22
 
+
+#endif
+
 #define WIFI_SUCCESS 1 << 0
 #define WIFI_FAILURE 1 << 1
 #define TCP_SUCCESS 1 << 0
 #define TCP_FAILURE 1 << 1
 #define MAX_FAILURES 10
 
-#endif
-
-#if defined(CONFIG_EXAMPLE_IPV4)
-    #define HOST_IP_ADDR CONFIG_EXAMPLE_IPV4_ADDR
-#else
-    #define HOST_IP_ADDR ""
-#endif
-
+#define SERVO_PIN 13
 
 #if ESP_CAMERA_SUPPORTED
 static camera_config_t camera_config = {
@@ -151,29 +148,31 @@ void app_main(void){
         camera_data.in_use_mtx = xSemaphoreCreateMutex();
         camera_data.cam_frame_buf = NULL;
 
-        xTaskCreate(udp_client_task, "udp-client", 4096, (void *) &camera_data, 5, NULL);
-
+        // xTaskCreate(udp_client_task, "udp-client", 4096, (void *) &camera_data, configMAX_PRIORITIES-1, NULL);
+        // xTaskCreate(servo_handler_task, "servo-controller", 4096, (void *) SERVO_PIN, 1, NULL);
         
-        while (true) {
-            // Block for 10 ms, continue with camera capture
-            // if (xSemaphoreTake(camera_data.in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) != pdTRUE) {
-            //     // Wait and retry if mutex is not free
-            //     vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
-            //     continue;
-            // }
+        udp_client_task((void *) &camera_data);
+
+        // while (true) {
+        //     // Block for 10 ms, continue with camera capture
+        //     // if (xSemaphoreTake(camera_data.in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) != pdTRUE) {
+        //     //     // Wait and retry if mutex is not free
+        //     //     vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
+        //     //     continue;
+        //     // }
             
-            // ESP_LOGI(TAG, "Taking a picture...");
+        //     // ESP_LOGI(TAG, "Taking a picture...");
 
-            // camera_data.cam_frame_buf = esp_camera_fb_get();
-            // ESP_LOGI(TAG, "Image taken, %zu bytes", camera_data.cam_frame_buf -> len);
-            // ESP_LOGI(TAG, "%dX%d pixels", camera_data.cam_frame_buf -> width, camera_data.cam_frame_buf -> height);
+        //     // camera_data.cam_frame_buf = esp_camera_fb_get();
+        //     // ESP_LOGI(TAG, "Image taken, %zu bytes", camera_data.cam_frame_buf -> len);
+        //     // ESP_LOGI(TAG, "%dX%d pixels", camera_data.cam_frame_buf -> width, camera_data.cam_frame_buf -> height);
 
-            // esp_camera_fb_return(camera_data.cam_frame_buf);
+        //     // esp_camera_fb_return(camera_data.cam_frame_buf);
 
-            // xSemaphoreGive(camera_data.in_use_mtx);
-            ESP_LOGI(TAG, "Main Thread kept alive");
-            vTaskDelay(7500 / portTICK_PERIOD_MS);
-        }
+        //     // xSemaphoreGive(camera_data.in_use_mtx);
+        //     ESP_LOGI(TAG, "Main Thread kept alive");
+        //     vTaskDelay(7500 / portTICK_PERIOD_MS);
+        // }
         
         return;
 

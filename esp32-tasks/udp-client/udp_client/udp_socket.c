@@ -61,26 +61,18 @@ void udp_client_task(void *param_args) {
 
         // Setting timeout
         struct timeval timeout;
-        timeout.tv_sec = 5;
-        timeout.tv_usec = 0;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 7500;
         setsockopt(client_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 
         int end_delim = 0;
         char dimensions_str[40];
 
         while (1) {
-            // Block for 10 ms, continue with transfer if free
-            if (xSemaphoreTake(camera_data -> in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) == pdFALSE) {
-                // Wait and retry if mutex is not free
-                vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
-                continue;
-            }
-
             camera_fb_t *cam_frame_buff = esp_camera_fb_get();
 
             if (!cam_frame_buff) {
                 ESP_LOGE(TAG, "Could not get camera frame buffer");
-                xSemaphoreGive(camera_data -> in_use_mtx);
                 break;
             }
 
@@ -103,7 +95,6 @@ void udp_client_task(void *param_args) {
 
             if (send_err < 0) {
                 esp_camera_fb_return(cam_frame_buff);
-                xSemaphoreGive(camera_data -> in_use_mtx);
                 ESP_LOGE(TAG, "Unable to send dimension/image size data, retyring...");
                 continue;
             }
@@ -143,6 +134,7 @@ void udp_client_task(void *param_args) {
                     ESP_LOGE(TAG, "Unable to send image payload: %d", errno);
                     continue;
                 }
+                // ESP_LOGI(TAG, "Sent packet no. %d", i+1);
             }
 
             free(raw_payload);
@@ -161,9 +153,6 @@ void udp_client_task(void *param_args) {
             }
 
             ESP_LOGI(TAG, "Image sent");
-
-            xSemaphoreGive(camera_data -> in_use_mtx);
-            vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
 
         if (client_sock != -1) {
@@ -171,16 +160,8 @@ void udp_client_task(void *param_args) {
             shutdown(client_sock, 0);
             close(client_sock);
         }
-
-        // vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 
-    vTaskDelete(NULL);
-    
     death:
-    {  // Loop forever after dying
-        for (;;) {
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
-        }
-    }
+        vTaskDelete(NULL);
 }

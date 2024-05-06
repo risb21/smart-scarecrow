@@ -56,7 +56,7 @@ def main() -> None:
     print("#ifndef SERVER_CONFIG_H\n#define SERVER_CONFIG_H\n")
     print(f"#define SERVER_IP \"{server_ip}\"")
     print(f"#define SERVER_PORT {server_port}")
-    print(f"#define SERVER_BUFF_SIZE {buffer_size-36} // in Bytes")
+    print(f"#define SERVER_BUFF_SIZE {buffer_size/2} // in Bytes")
     print("\n#endif")
 
     display_once = False
@@ -79,18 +79,8 @@ def main() -> None:
                     img = [tuple([max(min(int(x/what * 256), 255), 0) for x in i][::-1]) for i in img]
                     img = [img[i * x_dim:(i + 1) * x_dim] for i in range(y_dim)]
                     img_data: np.ndarray = np.array(img, dtype=np.uint8)
-                    # img_data = img_data.reshape((x_dim, y_dim, 3))
-                    # print(x_dim, y_dim, arr_len, image)
-                    # formatted = format_pixels(x_dim, y_dim, arr_len, image)
-                    # if len(formatted) != 0:
-                        # img = Image.frombytes("")
-                    # print(len(image), arr_len)
                     cv.imshow("camera", img_data)
-                    cv.waitKey(100)
-                    # plt.imshow(formatted)
-                    # print(idk)
-                    # print(type(idk))
-                    # plt.show()
+                    cv.waitKey(8)
             else:
                 print("Attempting to update image")
                 idk.set_data(format_pixels(x_dim, y_dim, arr_len, image))

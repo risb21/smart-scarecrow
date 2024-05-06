@@ -12,9 +12,11 @@ set(srcs
   ../wifi_conn/wifi_config.h
   ../wifi_conn/wifi_connection.c
   ../wifi_conn/wifi_connection.h
-  ../UDP_sockets/udp_socket.c
-  ../UDP_sockets/udp_socket.h
-  ../UDP_sockets/server_config.h
+  ../udp_client/udp_socket.c
+  ../udp_client/udp_socket.h
+  ../udp_client/server_config.h
+  ../servo_control/servo_controller.h
+  ../servo_control/servo_controller.c
   )
 
 set(priv_include_dirs
