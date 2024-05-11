@@ -39,8 +39,7 @@ There 4 are main tasks performed by the ESP32 CAM:
     - `RXD/RX (FTDI)` $\Rightarrow$ `UOT (ESP32 CAM)`
     <br>
     <br>
-    <img src='https://cgomesu.com/assets/posts/2021-01-15-Esp32cam-tasmota-webcam-server/esp32cam-wiring-flash-mode.jpg' alt='Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode'/>
-    <!-- ![Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode](https://cgomesu.com/assets/posts/2021-01-15-Esp32cam-tasmota-webcam-server/esp32cam-wiring-flash-mode.jpg) -->
+    ![esp32cam-wiring-flash-mode](https://github.com/risb21/smart-scarecrow/assets/65121903/3ac32477-b795-4bd7-a5dc-c23092c02a5f)
 1. Determine the port on which the ESP32 CAM is connected<br>
     - Linux:<br>
       ```sh
