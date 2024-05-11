@@ -59,7 +59,7 @@ There 4 are main tasks performed by the ESP32 CAM:
 1. Press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
 1. Run the TCP client python script in `../tcp-socket-client`. Using the IP address and port of the TCP server running on the ESP32 CAM, which is mentioned in the logs, enter them in the TCP client script:
 
-    ![Getting TCP server IP and port from the logs from the ESP32 CAM](esp32-tasks/ESP32_CAM_Boot.png)
+    ![Getting TCP server IP and port from the logs from the ESP32 CAM](https://github.com/risb21/smart-scarecrow/assets/65121903/1320ad5a-b84d-496b-87d1-aca6ed99a5eb)
 
 ## Build Order
 
