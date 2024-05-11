@@ -21,7 +21,7 @@ There 4 are main tasks performed by the ESP32 CAM:
 1. In the `./udp_client` directory, the server config details must be added in `server_config.h`. This will be done by the python script in `../udp-socket-server/`.
 1. In the `./wifi_conn` directory, the wifi connection config details must be added in `wifi_config.h`. The following format must be used:
     
-    ```h
+    ```C
     #ifndef WIFI_CONFIG_H
     #define WIFI_CONFIG_H
 
@@ -33,7 +33,7 @@ There 4 are main tasks performed by the ESP32 CAM:
 1. Before connecting the ESP32 CAM to a USB port, short the `GND` and `IO0` pins.
     Make the following other connections to the FTDI Programmer:
 
-    - `GND (FTDI)` $\space \space\space\space\space\Rightarrow$ `GND (ESP32 CAM)` 
+    - `GND (FTDI)` $\space\space\space\space\Rightarrow$ `GND (ESP32 CAM)` 
     - `VCC/5V (FTDI)` $\Rightarrow$ `5V (ESP32 CAM)` 
     - `TXD/TX (FTDI)` $\Rightarrow$ `UOR (ESP32 CAM)` 
     - `RXD/RX (FTDI)` $\Rightarrow$ `UOT (ESP32 CAM)`
@@ -58,7 +58,7 @@ There 4 are main tasks performed by the ESP32 CAM:
     ```
 1. Press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
 1. Run the TCP client python script in `../tcp-socket-client`. Using the IP address and port of the TCP server running on the ESP32 CAM, which is mentioned in the logs, enter them in the TCP client script:
-    ![Getting TCP server IP and port from the logs from the ESP32 CAM](../static/ESP32_CAM_Boot.png)
+    ![Getting TCP server IP and port from the logs from the ESP32 CAM](ESP32_CAM_Boot.png)
 
 ## Build Order
 
