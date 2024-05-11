@@ -36,9 +36,11 @@ There 4 are main tasks performed by the ESP32 CAM:
     - `GND (FTDI)` $\space \space\space\space\space\Rightarrow$ `GND (ESP32 CAM)` 
     - `VCC/5V (FTDI)` $\Rightarrow$ `5V (ESP32 CAM)` 
     - `TXD/TX (FTDI)` $\Rightarrow$ `UOR (ESP32 CAM)` 
-    - `RXD/RX (FTDI)` $\Rightarrow$ `UOT (ESP32 CAM)` 
-
-    ![Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode](https://cgomesu.com/assets/posts/2021-01-15-Esp32cam-tasmota-webcam-server/esp32cam-wiring-flash-mode.jpg)
+    - `RXD/RX (FTDI)` $\Rightarrow$ `UOT (ESP32 CAM)`
+    <br>
+    <br>
+    <img src='https://cgomesu.com/assets/posts/2021-01-15-Esp32cam-tasmota-webcam-server/esp32cam-wiring-flash-mode.jpg' alt='Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode'/>
+    <!-- ![Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode](https://cgomesu.com/assets/posts/2021-01-15-Esp32cam-tasmota-webcam-server/esp32cam-wiring-flash-mode.jpg) -->
 1. Determine the port on which the ESP32 CAM is connected<br>
     - Linux:<br>
       ```sh
@@ -56,7 +58,7 @@ There 4 are main tasks performed by the ESP32 CAM:
     ```
 1. Press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
 1. Run the TCP client python script in `../tcp-socket-client`. Using the IP address and port of the TCP server running on the ESP32 CAM, which is mentioned in the logs, enter them in the TCP client script:
-    ![Getting TCP server IP and port from the logs from the ESP32 CAM](/static/ESP32_CAM_Boot.png)
+    ![Getting TCP server IP and port from the logs from the ESP32 CAM](../static/ESP32_CAM_Boot.png)
 
 ## Build Order
 
