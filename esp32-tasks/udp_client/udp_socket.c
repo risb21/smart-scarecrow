@@ -3,7 +3,6 @@
 
 static const char *TAG = "UDP Socket Connection";
 static const char *done_message = "DONE";
-camera_data_t *camera_data;
 
 
 // Returns length of payload, and pointer to data in *data
@@ -13,7 +12,7 @@ int get_raw_payload(camera_fb_t *cam_fb, int start_fb, uint8_t *data) {
         return -1;
     }
 
-    // if (sensor_data -> pixformat != PIXFORMAT_RGB565 || sensor_data -> pixformat != PIXFORMAT_JPEG) {
+    // if (sensor_data -> pixformat != PIXFORMAT_RGB565 && sensor_data -> pixformat != PIXFORMAT_JPEG) {
     //     ESP_LOGE(TAG, "Other pixel formats are not implemented");
     //     return -1;
     // }
@@ -36,7 +35,6 @@ void udp_client_task(void *param_args) {
     int addr_family = 0;
     int ip_protocol = 0; // UDP
     struct sockaddr_in server_addr;
-    camera_data = (camera_data_t *) param_args;
 
     while (1) {
         struct sockaddr_in *server = &server_addr;
@@ -95,7 +93,7 @@ void udp_client_task(void *param_args) {
 
             if (send_err < 0) {
                 esp_camera_fb_return(cam_frame_buff);
-                ESP_LOGE(TAG, "Unable to send dimension/image size data, retyring...");
+                // ESP_LOGE(TAG, "Unable to send dimension/image size data, retyring...");
                 continue;
             }
             
@@ -131,10 +129,8 @@ void udp_client_task(void *param_args) {
 
                 if (err < 0) {
                     i--;
-                    ESP_LOGE(TAG, "Unable to send image payload: %d", errno);
                     continue;
                 }
-                // ESP_LOGI(TAG, "Sent packet no. %d", i+1);
             }
 
             free(raw_payload);
@@ -152,7 +148,7 @@ void udp_client_task(void *param_args) {
                 );
             }
 
-            ESP_LOGI(TAG, "Image sent");
+            // ESP_LOGI(TAG, "Image sent");
         }
 
         if (client_sock != -1) {

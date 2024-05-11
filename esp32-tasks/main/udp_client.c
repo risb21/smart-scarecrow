@@ -13,6 +13,7 @@
 #include "../wifi_conn/wifi_connection.h"
 #include "../udp_client/udp_socket.h"
 #include "../servo_control/servo_controller.h"
+#include "../tcp_server/tcp_servo_control.h"
 
 #include <stdio.h>
 #include <sys/param.h>
@@ -22,6 +23,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+
+#include "driver/gpio.h"
 
 // support IDF 5.x
 #ifndef portTICK_RATE_MS
@@ -53,16 +56,7 @@
 #define CAM_PIN_HREF 23
 #define CAM_PIN_PCLK 22
 
-
 #endif
-
-#define WIFI_SUCCESS 1 << 0
-#define WIFI_FAILURE 1 << 1
-#define TCP_SUCCESS 1 << 0
-#define TCP_FAILURE 1 << 1
-#define MAX_FAILURES 10
-
-#define SERVO_PIN 13
 
 #if ESP_CAMERA_SUPPORTED
 static camera_config_t camera_config = {
@@ -143,36 +137,34 @@ void app_main(void){
             ESP_LOGI(TAG, "Connected to the internet! IP Address: %s", wifi_ip_addr);
         }
 
-        camera_data_t camera_data;
-        // camera_data.has_data = false;
-        camera_data.in_use_mtx = xSemaphoreCreateMutex();
-        camera_data.cam_frame_buf = NULL;
-
         // xTaskCreate(udp_client_task, "udp-client", 4096, (void *) &camera_data, configMAX_PRIORITIES-1, NULL);
-        // xTaskCreate(servo_handler_task, "servo-controller", 4096, (void *) SERVO_PIN, 1, NULL);
+
+        servo_param_360 spin1 = {
+            .pin1 = 14,
+            .pin2 = 2
+        };
+
+        xTaskCreate(servo_handler_task, "servo-controller", 4096, (void *) &spin1, 1, NULL);
+        // udp_client_task((void *) &camera_data);
+
+        xTaskCreate(udp_client_task, "image-xfer", 4096, NULL, 5, NULL);
+
+        tcp_server_task(NULL);
+
+        // xTaskCreate(tcp_server_task, "tcp-servo-server", 4096, NULL, 2, NULL);
         
-        udp_client_task((void *) &camera_data);
+        // gpio_set_direction(GPIO_NUM_0, GPIO_MODE_OUTPUT);
 
         // while (true) {
-        //     // Block for 10 ms, continue with camera capture
-        //     // if (xSemaphoreTake(camera_data.in_use_mtx, (TickType_t) (10 / portTICK_PERIOD_MS)) != pdTRUE) {
-        //     //     // Wait and retry if mutex is not free
-        //     //     vTaskDelay((TickType_t) (50 / portTICK_PERIOD_MS));
-        //     //     continue;
-        //     // }
-            
-        //     // ESP_LOGI(TAG, "Taking a picture...");
-
-        //     // camera_data.cam_frame_buf = esp_camera_fb_get();
-        //     // ESP_LOGI(TAG, "Image taken, %zu bytes", camera_data.cam_frame_buf -> len);
-        //     // ESP_LOGI(TAG, "%dX%d pixels", camera_data.cam_frame_buf -> width, camera_data.cam_frame_buf -> height);
-
-        //     // esp_camera_fb_return(camera_data.cam_frame_buf);
-
-        //     // xSemaphoreGive(camera_data.in_use_mtx);
-        //     ESP_LOGI(TAG, "Main Thread kept alive");
-        //     vTaskDelay(7500 / portTICK_PERIOD_MS);
+        //     gpio_set_level(GPIO_NUM_0, 1);
+        //     ESP_LOGE(TAG, "Set pin 0 to 1");
+        //     vTaskDelay(2000 / portTICK_PERIOD_MS);
+        //     gpio_set_level(GPIO_NUM_0, 0);
+        //     ESP_LOGE(TAG, "Set pin 0 to 0");
+        //     vTaskDelay(2000 / portTICK_PERIOD_MS);
         // }
+
+
         
         return;
 

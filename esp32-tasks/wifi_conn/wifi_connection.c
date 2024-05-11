@@ -1,6 +1,12 @@
 #include "wifi_config.h"
 #include "wifi_connection.h"
 
+#define WIFI_SUCCESS 1 << 0
+#define WIFI_FAILURE 1 << 1
+#define TCP_SUCCESS 1 << 0
+#define TCP_FAILURE 1 << 1
+#define MAX_FAILURES 10
+
 // task tag
 static const char *TAG = "WIFI";
 

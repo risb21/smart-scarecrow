@@ -5,6 +5,7 @@ import matplotlib
 import numpy as np
 import cv2 as cv
 from PIL import Image
+import PIL
 import io
 
 
@@ -72,15 +73,18 @@ def main() -> None:
             if not idk:
                 # print()
                 if len(image) == arr_len and len(image) > 0:
-                    byte_stream = io.BytesIO(bytearray(image))
-                    img = Image.open(byte_stream)
-                    img = list(img.getdata())
-                    what = max([max(i) for i in img])
-                    img = [tuple([max(min(int(x/what * 256), 255), 0) for x in i][::-1]) for i in img]
-                    img = [img[i * x_dim:(i + 1) * x_dim] for i in range(y_dim)]
-                    img_data: np.ndarray = np.array(img, dtype=np.uint8)
-                    cv.imshow("camera", img_data)
-                    cv.waitKey(8)
+                    try:
+                        byte_stream = io.BytesIO(bytearray(image))
+                        img = Image.open(byte_stream)
+                        img = list(img.getdata())
+                        what = max([max(i) for i in img])
+                        img = [tuple([max(min(int(x/what * 256), 255), 0) for x in i][::-1]) for i in img]
+                        img = [img[i * x_dim:(i + 1) * x_dim] for i in range(y_dim)]
+                        img_data: np.ndarray = np.array(img, dtype=np.uint8)
+                        cv.imshow("camera", img_data)
+                        cv.waitKey(6)
+                    except Exception as e:
+                        print(e)
             else:
                 print("Attempting to update image")
                 idk.set_data(format_pixels(x_dim, y_dim, arr_len, image))

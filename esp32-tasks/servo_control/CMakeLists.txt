@@ -6,7 +6,6 @@ set(srcs
 
 set(include_dirs
     "."
-    "include/"
 )
 
 idf_components_register(
