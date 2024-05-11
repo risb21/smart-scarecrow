@@ -40,12 +40,12 @@ static void do_retransmit(const int sock) {
             move_servo_180(atoi(num2));
             vTaskDelay(50 / portTICK_PERIOD_MS);
 
-            gpio_set_level(GPIO_NUM_0, 1);
-            ESP_LOGI(TAG, "Set pin 0 to 1");
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_NUM_0, 0);
-            ESP_LOGI(TAG, "Set pin 0 to 0");
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            // gpio_set_level(GPIO_NUM_0, 1);
+            // ESP_LOGI(TAG, "Set pin 0 to 1");
+            // vTaskDelay(5000 / portTICK_PERIOD_MS);
+            // gpio_set_level(GPIO_NUM_0, 0);
+            // ESP_LOGI(TAG, "Set pin 0 to 0");
+            // vTaskDelay(5000 / portTICK_PERIOD_MS);
 
         }
     } while (len > 0);

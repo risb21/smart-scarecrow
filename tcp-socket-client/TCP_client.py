@@ -6,8 +6,9 @@ random.seed(2024 >> 2 ^ 2024 << 2)
 
 def main() -> None:
     """ Set server details """
-    server = ( "172.20.10.2", 4200)
-    (server_ip, server_port) = server
+    server_ip = input("Enter the server's IP address: ")
+    server_port = input("Enter the server's port: ")
+    server = (server_ip, server_port)
 
     """ Set up client """
     client_sock = socket.socket()

@@ -5,9 +5,8 @@ import matplotlib
 import numpy as np
 import cv2 as cv
 from PIL import Image
-import PIL
 import io
-
+import os
 
 server_port = 2048
 buffer_size = 1 << 13  # Bytes
@@ -50,17 +49,38 @@ def main() -> None:
     """ Setup UDP Server """
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # Listen for all IP addresses trying to connect
-    server_sock.bind(("", server_port))
+    server_sock.bind(("", buffer_size))
     print(f"Server ({server_ip}:{server_port}) listening for connections...")
     
-    print("\nCopy and paste the following code into the server_config.h header file:\n")
-    print("#ifndef SERVER_CONFIG_H\n#define SERVER_CONFIG_H\n")
-    print(f"#define SERVER_IP \"{server_ip}\"")
-    print(f"#define SERVER_PORT {server_port}")
-    print(f"#define SERVER_BUFF_SIZE {buffer_size/2} // in Bytes")
-    print("\n#endif")
+    currpath = os.getcwd()
+    path_dirs: list[str] = [] 
+    while True:
+        temp_split = os.path.split(currpath)
+        if temp_split[1] == '':
+            break
+        path_dirs.append(temp_split[1])
+        currpath = temp_split[0]
+    
+    server_conf_path = ""
+    try:
+        idx = path_dirs.index("smart-scarecrow")
+        server_conf_path = f"{'../' * idx}esp32-tasks/udp_client/"
+    except:
+        server_conf_path = input("Enter absolute path for smart-scarecrow: ")
+        server_conf_path = os.path.join(server_conf_path, "esp32-tasks/udp_client/")
+    finally:
+        try:
+            os.chdir(server_conf_path)
+        except:
+            print("Invalid Path!")
 
-    display_once = False
+    with open("server_config.h", "w") as f:
+        f.write("#ifndef SERVER_CONFIG_H\n#define SERVER_CONFIG_H\n\n")
+        f.write(f"#define SERVER_IP \"{server_ip}\"\n")
+        f.write(f"#define SERVER_PORT {server_port}\n")
+        f.write(f"#define SERVER_BUFF_SIZE {int(buffer_size/2)} // in Bytes\n")
+        f.write("\n#endif")
+        
     get_dims = True
     x_dim, y_dim, arr_len = 0, 0, 0
     image = []
@@ -90,8 +110,6 @@ def main() -> None:
                 idk.set_data(format_pixels(x_dim, y_dim, arr_len, image))
                 plt.draw()
             image = []
-            # server_sock.sendto(f"OK".encode('utf-8'), client_addr)
-            display_once = True
             get_dims = True
             continue
 
@@ -106,16 +124,10 @@ def main() -> None:
                 get_dims = False
 
             else:
-                # row = eval(message)
                 image.extend(list(message))
             
-            # server_sock.sendto(f"OK".encode('utf-8'), client_addr)
         except Exception as e:
-            # Could not eval
-            # server_sock.sendto(f"RESEND".encode('utf-8'), client_addr)
             print(e)
-
-        # server_sock.sendto(f"OK".encode('utf-8'), client_addr)
 
 if __name__ == "__main__":
     main()
