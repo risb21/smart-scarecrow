@@ -65,3 +65,6 @@ There 4 are main tasks performed by the ESP32 CAM:
 - Run the Python script for the UDP Server for image transfer in `../udp-socket-server`
 - Follow the steps given above to run the ESP32 CAM
 - Use the IP address of the ESP32 CAM and the port no. to run the TCP client for angle transfer in `../tcp-socket-client`
+
+## Wiring Diagram for the ESP32 CAM
+![Smart-Scarecrow-Circuit](https://github.com/risb21/smart-scarecrow/assets/65121903/01050425-0a3c-41c4-b720-579907cbcecc)
