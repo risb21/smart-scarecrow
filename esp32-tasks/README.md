@@ -8,29 +8,32 @@ There 4 are main tasks performed by the ESP32 CAM:
 
 ## Building, Flashing and Monitoring the ESP32 CAM
 
-1. Run the export script to write all relevant variables to the environment.<br>
-    Linux:
-    ```sh
-    source $IDF_TOOLS_EXPORT_CMD
-    ```
-    Windows:
-    ```ps
-    # Assuming powershell is in this directory
-    .\..\lib\esp-idf\export.ps1
-    ```
-1. In the `./udp_client` directory, the server config details must be added in `server_config.h`. This will be done by the python script in `../udp-socket-server/`.
+1. Run the export script to write all relevant variables to the environment.
+
+Linux:
+```sh
+source $IDF_TOOLS_EXPORT_CMD
+```
+Windows:
+
+```ps
+# Assuming powershell is in this directory
+.\..\lib\esp-idf\export.ps1
+```
+2. In the `./udp_client` directory, the server config details must be added in `server_config.h`. This will be done by the python script in `../udp-socket-server/`.
+
 1. In the `./wifi_conn` directory, the wifi connection config details must be added in `wifi_config.h`. The following format must be used:
     
-    ```C
-    #ifndef WIFI_CONFIG_H
-    #define WIFI_CONFIG_H
+```C
+#ifndef WIFI_CONFIG_H
+#define WIFI_CONFIG_H
 
-    #define WIFI_SSID "your_wifi_ssid_here"
-    #define WIFI_PW "your_password_here"
+#define WIFI_SSID "your_wifi_ssid_here"
+#define WIFI_PW "your_password_here"
 
-    #endif
-    ```
-1. Before connecting the ESP32 CAM to a USB port, short the `GND` and `IO0` pins.
+#endif
+```
+4. Before connecting the ESP32 CAM to a USB port, short the `GND` and `IO0` pins.
     Make the following other connections to the FTDI Programmer:
 
     - `GND (FTDI)` $\space\space\space\space\Rightarrow$ `GND (ESP32 CAM)` 
@@ -42,8 +45,9 @@ There 4 are main tasks performed by the ESP32 CAM:
     <img src="https://github.com/risb21/smart-scarecrow/assets/65121903/408e3a76-b14b-4487-b5f1-cee3dee14c78" alt="Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode"/>
 1. Determine the port on which the ESP32 CAM is connected<br>
     - Linux:<br>
-      ```sh
-      ls /dev | grep -E "(ttyACM|ttyUSB)"
+    ```sh
+    ls /dev | grep -E "(ttyACM|ttyUSB)"
+    ```
     - Windows:<br>
       Open `Device Manager -> Ports (COM & LPT)`
     
@@ -55,7 +59,7 @@ There 4 are main tasks performed by the ESP32 CAM:
     ```sh
     idf.py --no-ccache -p <COMx or /dev/ttyUSBx or /dev/ttyACMx> build flash monitor
     ```
-1. Press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
+1. Remove the short between `IO0` and `GND` and press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
 1. Run the TCP client python script in `../tcp-socket-client`. Using the IP address and port of the TCP server running on the ESP32 CAM, which is mentioned in the logs, enter them in the TCP client script:
 
     ![Getting TCP server IP and port from the logs from the ESP32 CAM](https://github.com/risb21/smart-scarecrow/assets/65121903/1320ad5a-b84d-496b-87d1-aca6ed99a5eb)
