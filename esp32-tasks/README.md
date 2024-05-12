@@ -67,4 +67,4 @@ There 4 are main tasks performed by the ESP32 CAM:
 - Use the IP address of the ESP32 CAM and the port no. to run the TCP client for angle transfer in `../tcp-socket-client`
 
 ## Wiring Diagram for the ESP32 CAM
-![Smart-Scarecrow-Circuit](https://github.com/risb21/smart-scarecrow/assets/65121903/1569a289-b58c-4c79-893c-da46f1075303)
+![Smart-Scarecrow-Circuit](https://github.com/risb21/smart-scarecrow/assets/65121903/e1dd67ab-2349-4421-b6bc-9a9819f9bdb5)
