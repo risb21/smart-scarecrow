@@ -44,22 +44,22 @@ Windows:
     <br>
     <img src="https://github.com/risb21/smart-scarecrow/assets/65121903/408e3a76-b14b-4487-b5f1-cee3dee14c78" alt="Circuit diagram for connecting the ESP32 CAM to the FTDI programmer in flash mode"/>
 1. Determine the port on which the ESP32 CAM is connected<br>
-    - Linux:<br>
-    ```sh
-    ls /dev | grep -E "(ttyACM|ttyUSB)"
-    ```
-    - Windows:<br>
+  - Linux:<br>
+```sh
+ls /dev | grep -E "(ttyACM|ttyUSB)"
+```
+   - Windows:<br>
       Open `Device Manager -> Ports (COM & LPT)`
     
-1. Build, Flash and Monitor (from this directory)
-    ```sh
-    idf.py -p <COMx or /dev/ttyUSBx or /dev/ttyACMx> build flash monitor
-    ```
-    on Windows, the path lengths can exceed the default limit while building, causing build to fail. Use the following command instead:
-    ```sh
-    idf.py --no-ccache -p <COMx or /dev/ttyUSBx or /dev/ttyACMx> build flash monitor
-    ```
-1. Remove the short between `IO0` and `GND` and press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
+6. Build, Flash and Monitor (from this directory)
+```sh
+idf.py -p <COMx or /dev/ttyUSBx or /dev/ttyACMx> build flash monitor
+```
+on Windows, the path lengths can exceed the default limit while building, causing build to fail. Use the following command instead:
+```sh
+idf.py --no-ccache -p <COMx or /dev/ttyUSBx or /dev/ttyACMx> build flash monitor
+```
+7. Remove the short between `IO0` and `GND` and press the `RST` button to reset the ESP32 CAM, booting it up with the newly flashed program 
 1. Run the TCP client python script in `../tcp-socket-client`. Using the IP address and port of the TCP server running on the ESP32 CAM, which is mentioned in the logs, enter them in the TCP client script:
 
     ![Getting TCP server IP and port from the logs from the ESP32 CAM](https://github.com/risb21/smart-scarecrow/assets/65121903/1320ad5a-b84d-496b-87d1-aca6ed99a5eb)
