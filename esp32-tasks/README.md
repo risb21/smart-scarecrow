@@ -69,6 +69,3 @@ idf.py --no-ccache -p <COMx or /dev/ttyUSBx or /dev/ttyACMx> build flash monitor
 - Run the Python script for the UDP Server for image transfer in `../udp-socket-server`
 - Follow the steps given above to run the ESP32 CAM
 - Use the IP address of the ESP32 CAM and the port no. to run the TCP client for angle transfer in `../tcp-socket-client`
-
-## Wiring Diagram for the ESP32 CAM
-![Smart-Scarecrow-Circuit](https://github.com/risb21/smart-scarecrow/assets/65121903/e1dd67ab-2349-4421-b6bc-9a9819f9bdb5)
